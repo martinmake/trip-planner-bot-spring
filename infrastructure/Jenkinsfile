@@ -1,0 +1,77 @@
+// infra.job - deploys Heat stack (creates VM on OpenStack)
+// Requires: openstack CLI
+
+pipeline {
+    agent {
+        label 'michalec'
+    }
+
+    tools {
+        git 'Default'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '14', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(name: 'STACK_NAME', defaultValue: 'michalec-tripplanner', description: 'Heat stack name')
+        string(name: 'IMAGE',      defaultValue: 'ununtu-22.04',         description: 'Glance image')
+        string(name: 'FLAVOR',     defaultValue: 'm1.small',             description: 'Nova flavor')
+        string(name: 'KEY_NAME',   defaultValue: 'Martin Michalec',       description: 'SSH key pair name')
+        string(name: 'NETWORK',    defaultValue: 'sutdents-net',         description: 'Network name or ID')
+
+        string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000/v3', description: 'OpenStack authentication URL')
+        string (name: 'OS_PROJECT_NAME',         defaultValue: 'students',                        description: 'OpenStack project name')
+        string (name: 'OS_USERNAME',             defaultValue: 'ccstudent2026',                   description: 'OpenStack username')
+        string (name: 'OS_USER_DOMAIN_NAME',     defaultValue: 'default',                         description: 'OpenStack user domain name')
+        string (name: 'OS_PROJECT_DOMAIN_NAME',  defaultValue: 'default',                         description: 'OpenStack project domain name')
+        string (name: 'OS_IDENTITY_API_VERSION', defaultValue: '3',                               description: 'OpenStack identity API version')
+    }
+
+    environment {
+        OS_AUTH_URL             = "${params.OS_AUTH_URL}"
+        OS_PROJECT_NAME         = "${params.OS_PROJECT_NAME}"
+        OS_USERNAME             = "${params.OS_USERNAME}"
+        OS_USER_DOMAIN_NAME     = "${params.OS_USER_DOMAIN_NAME}"
+        OS_PROJECT_DOMAIN_NAME  = "${params.OS_PROJECT_DOMAIN_NAME}"
+        OS_IDENTITY_API_VERSION = "${params.OS_IDENTITY_API_VERSION}"
+        OS_PASSWORD = credentials('os-password')
+    }
+
+    stages {
+        stage('Deploy Heat Stack') {
+            steps {
+                script {
+                    def exists = sh(returnStatus: true, script:
+                                    "openstack stack show ${params.STACK_NAME} >/dev/null 2>&1") == 0
+                    def cmd = exists ? 'update' : 'create'
+                    sh """openstack stack ${cmd} -t infrastructure/heat/tripplanner-stack.yaml \
+  --parameter "image=${params.IMAGE}" \
+  --parameter "flavor=${params.FLAVOR}" \
+  --parameter "key_name=${params.KEY_NAME}" \
+  --parameter "network=${params.NETWORK}" \
+  ${params.STACK_NAME}
+"""
+                }
+            }
+        }
+        stage('Wait for Stack') {
+            steps {
+                sh "openstack stack show ${params.STACK_NAME} -f json"
+                sh """
+until openstack stack show ${params.STACK_NAME} -f value -c stack_status 2>/dev/null \
+ | grep -qE 'CREATE_COMPLETE|UPDATE_COMPLETE'; do
+sleep 10
+done || true
+"""
+            }
+        }
+    }
+    post {
+        always {
+            archiveArtifacts artifacts: 'heat/*.yaml', allowEmptyArchive: true
+        }
+    }
+}
