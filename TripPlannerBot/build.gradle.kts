@@ -1,19 +1,18 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-
-val springVersion = "6.1.5"
+val springVersion = "6.2.0"
 val modulithVer = "1.1.1"
 
 plugins {
-    id("org.springframework.boot") version "3.2.0"
-    id("io.spring.dependency-management") version "1.1.4"
+    id("org.springframework.boot") version "3.4.0"
+    id("io.spring.dependency-management") version "1.1.6"
     id("java")
     id("application") // оставить!
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "9.3.2"
 }
 
 group = "org.tripplanner"
 version = "0.0.1-SNAPSHOT"
-java.sourceCompatibility = JavaVersion.VERSION_22
+java.sourceCompatibility = JavaVersion.VERSION_21
+java.targetCompatibility = JavaVersion.VERSION_21
 
 repositories {
     mavenCentral()
@@ -45,8 +44,8 @@ dependencies {
     // Тесты
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework:spring-test:$springVersion")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.10.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.10.2")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.10.2")
+    testImplementation("org.junit.platform:junit-platform-launcher:1.10.2")
     testImplementation("io.projectreactor:reactor-test")
 
     implementation("org.telegram:telegrambots:6.7.0")
