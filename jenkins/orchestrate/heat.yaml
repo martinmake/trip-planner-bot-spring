@@ -83,7 +83,9 @@ resources:
                   uri: http://mirror.yandex.ru/ubuntu/
               sources:
                 mongodb-org:
-                  source: "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg] https://repo.mongodb.org/apt/ubuntu $RELEASE/mongodb-org/8.0 multiverse"
+                  source: >
+                    "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg] \
+                    https://repo.mongodb.org/apt/ubuntu $RELEASE/mongodb-org/8.0 multiverse"
             package_update: true
             package_upgrade: true
             packages:
@@ -94,7 +96,9 @@ resources:
               - systemctl enable mongodb
               - systemctl start mongodb
               - cloud-init status --wait
-              - $WAIT_HANDLE_CURL_CLI -d '{"status":"SUCCESS","reason":"cloud-init completed"}'
+              - |
+                $WAIT_HANDLE_CURL_CLI \
+                -d '{"status":"SUCCESS","reason":"cloud-init completed"}'
           params:
             $WAIT_HANDLE_CURL_CLI: { get_attr: [ wait_handle, curl_cli ] }
 
