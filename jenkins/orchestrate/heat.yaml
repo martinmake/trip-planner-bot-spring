@@ -55,14 +55,27 @@ resources:
       key_name: { get_param: key_name }
       networks:
         - port: { get_resource: server_port }
+      user_data_format: RAW
       user_data: |
         #cloud-config
+        bootcmd:
+          - |
+            curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
+              | gpg --dearmor > /usr/share/keyrings/mongodb-server-8.0.gpg
+        apt:
+          sources:
+            mongodb-org:
+              source: "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg] https://repo.mongodb.org/apt/ubuntu $RELEASE/mongodb-org/8.0 multiverse"
         package_update: true
         package_upgrade: true
         packages:
           - openjdk-21-jdk
-          - mongodb
+          - mongodb-org
           - curl
+        runcmd:
+          - systemctl enable mongodb
+          - systemctl start mongodb
+
 outputs:
   instance_id:
     description: Instance ID
