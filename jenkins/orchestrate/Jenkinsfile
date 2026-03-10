@@ -16,7 +16,7 @@ pipeline {
         string(name: 'STACK_NAME', defaultValue: 'michalec-tripplanner', description: 'Heat stack name')
         string(name: 'IMAGE',      defaultValue: 'ununtu-22.04',         description: 'Glance image')
         string(name: 'FLAVOR',     defaultValue: 'm1.small',             description: 'Nova flavor')
-        string(name: 'KEY_NAME',   defaultValue: 'Martin Michalec',       description: 'SSH key pair name')
+        string(name: 'KEY_NAME',   defaultValue: 'Martin Michalec',      description: 'SSH key pair name')
         string(name: 'NETWORK',    defaultValue: 'sutdents-net',         description: 'Network name or ID')
 
         string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000/v3', description: 'OpenStack authentication URL')

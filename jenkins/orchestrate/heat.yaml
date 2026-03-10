@@ -92,8 +92,10 @@ resources:
               - openjdk-21-jdk
               - mongodb-org
               - curl
+            users:
+            - name: tripplanner
+              groups: []
             runcmd:
-              - cloud-init status --wait
               - systemctl enable mongod
               - systemctl start mongod
               - |
