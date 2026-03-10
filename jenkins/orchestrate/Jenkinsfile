@@ -1,6 +1,3 @@
-// stack.jenkinsfile - deploys Heat stack (creates VM on OpenStack)
-// Requires: openstack CLI
-
 pipeline {
     agent {
         label 'michalec'
@@ -31,31 +28,13 @@ pipeline {
     }
 
     environment {
-        OS_AUTH_URL             = "${params.OS_AUTH_URL}"
-        OS_PROJECT_NAME         = "${params.OS_PROJECT_NAME}"
-        OS_USERNAME             = "${params.OS_USERNAME}"
-        OS_USER_DOMAIN_NAME     = "${params.OS_USER_DOMAIN_NAME}"
-        OS_PROJECT_DOMAIN_NAME  = "${params.OS_PROJECT_DOMAIN_NAME}"
-        OS_IDENTITY_API_VERSION = "${params.OS_IDENTITY_API_VERSION}"
         OS_PASSWORD = credentials('os-password')
     }
 
     stages {
         stage('Deploy Heat Stack') {
             steps {
-                script {
-                    def exists = sh(returnStatus: true, script:
-                                    "openstack stack show ${params.STACK_NAME} >/dev/null 2>&1") == 0
-                    def cmd = exists ? 'update' : 'create'
-                    sh """openstack stack ${cmd} --wait \
-  -t infra/heat/tripplanner-stack.yaml                  \
-  --parameter "image=${params.IMAGE}"                   \
-  --parameter "flavor=${params.FLAVOR}"                 \
-  --parameter "key_name=${params.KEY_NAME}"             \
-  --parameter "network=${params.NETWORK}"               \
-  ${params.STACK_NAME}
-"""
-                }
+                sh './jenkins/orchestrate/deploy.sh'
             }
         }
     }
