@@ -43,7 +43,7 @@ pipeline {
 
         stage('Deploy Systemd Service') {
             steps {
-                sh './jenkins/orchestrate/remote.sh'
+                sh './jenkins/deploy/deploy.sh'
             }
         }
     }
