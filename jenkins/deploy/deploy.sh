@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -xeu
+set -xe
 
 if [ -z "$VM_HOST" ]; then
     VM_HOST=$(openstack stack output show ${STACK_NAME} instance_ip -f value -c output_value 2>/dev/null)
