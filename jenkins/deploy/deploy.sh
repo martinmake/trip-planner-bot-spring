@@ -4,7 +4,7 @@ set -xeu
 
 if [ -z "$VM_HOST" ]; then
     VM_HOST=$(openstack stack output show ${STACK_NAME} instance_ip -f value -c output_value 2>/dev/null)
-    if [ -z "$?" ] then
+    if [ -z "$?" ]; then
        echo "VM_HOST is empty and could not get from Heat stack.  Set VM_HOST parameter or run infra job first."
        exit 1
     fi
