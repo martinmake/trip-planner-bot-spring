@@ -1,0 +1,53 @@
+pipeline {
+    agent {
+        label 'michalec'
+    }
+
+    tools {
+        git 'Default'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '14', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(name: 'VM_HOST',           defaultValue: '',                     description: 'IP/hostname of VM (leave empty to get from Heat stack)')
+        string(name: 'STACK_NAME',        defaultValue: 'michalec-tripplanner', description: 'Heat stack name for IP lookup')
+        string(name: 'SSH_USER',          defaultValue: 'ubuntu',               description: 'SSH user on VM (ubuntu for Ubuntu cloud images)')
+        string(name: 'BUILD_JOB',         defaultValue: 'build',                description: 'Upstream build job that produces JAR (not deploy job!)')
+        string(name: 'SSH_CREDENTIAL_ID', defaultValue: 'Martin Michalec',      description: 'Jenkins credential ID for SSH to VM (ubuntu + private key)')
+
+        string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000/v3', description: 'OpenStack authentication URL')
+        string (name: 'OS_PROJECT_NAME',         defaultValue: 'students',                        description: 'OpenStack project name')
+        string (name: 'OS_USERNAME',             defaultValue: 'ccstudent2026',                   description: 'OpenStack username')
+        string (name: 'OS_USER_DOMAIN_NAME',     defaultValue: 'default',                         description: 'OpenStack user domain name')
+        string (name: 'OS_PROJECT_DOMAIN_NAME',  defaultValue: 'default',                         description: 'OpenStack project domain name')
+        string (name: 'OS_IDENTITY_API_VERSION', defaultValue: '3',                               description: 'OpenStack identity API version')
+    }
+
+    environment {
+        OS_PASSWORD = credentials('os-password')
+    }
+
+    stages {
+        stage('Copy Artifact') {
+            steps {
+                copyArtifacts(
+                    filter: 'TripPlannerBot/build/libs/*.jar',
+                    projectName: "${params.BUILD_JOB}",
+                    selector: specific('lastSuccessfulBuild')
+                )
+            }
+        }
+
+        stage('Deploy Systemd Service') {
+            steps {
+                sshagent(credentials: ["${params.SSH_CREDENTIAL_ID}"]) {
+                    sh './jenkins/orchestrate/remote.sh'
+                }
+            }
+        }
+    }
+}
