@@ -13,11 +13,10 @@ pipeline {
     }
 
     parameters {
-        string(name: 'VM_HOST',           defaultValue: '',                     description: 'IP/hostname of VM (leave empty to get from Heat stack)')
-        string(name: 'STACK_NAME',        defaultValue: 'michalec-tripplanner', description: 'Heat stack name for IP lookup')
-        string(name: 'SSH_USER',          defaultValue: 'ubuntu',               description: 'SSH user on VM (ubuntu for Ubuntu cloud images)')
-        string(name: 'BUILD_JOB',         defaultValue: 'build',                description: 'Upstream build job that produces JAR (not deploy job!)')
-        string(name: 'SSH_CREDENTIAL_ID', defaultValue: 'Martin Michalec',      description: 'Jenkins credential ID for SSH to VM (ubuntu + private key)')
+        string(name: 'VM_HOST',    defaultValue: '',                     description: 'IP/hostname of VM (leave empty to get from Heat stack)')
+        string(name: 'STACK_NAME', defaultValue: 'michalec-tripplanner', description: 'Heat stack name for IP lookup')
+        string(name: 'SSH_USER',   defaultValue: 'ubuntu',               description: 'SSH user on VM (ubuntu for Ubuntu cloud images)')
+        string(name: 'BUILD_JOB',  defaultValue: 'build',                description: 'Upstream build job that produces JAR (not deploy job!)')
 
         string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000/v3', description: 'OpenStack authentication URL')
         string (name: 'OS_PROJECT_NAME',         defaultValue: 'students',                        description: 'OpenStack project name')
@@ -44,9 +43,7 @@ pipeline {
 
         stage('Deploy Systemd Service') {
             steps {
-                sshagent(credentials: ["${params.SSH_CREDENTIAL_ID}"]) {
-                    sh './jenkins/orchestrate/remote.sh'
-                }
+                sh './jenkins/orchestrate/remote.sh'
             }
         }
     }
