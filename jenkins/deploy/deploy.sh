@@ -12,8 +12,8 @@ fi
 
 VM_HOST=$VM_HOST
 
-JAR_PATH="TripPlannerBot/build/libs/"
-JAR=$(ls "$JAR_PATH/*.jar" | head -1)
+JAR_PATH="TripPlannerBot/build/libs"
+JAR=$(ls $JAR_PATH/*.jar | head -1)
 if [ -z "$JAR" ]; then
     echo "No JAR found in: ${JAR_PATH}"
     exit 1
