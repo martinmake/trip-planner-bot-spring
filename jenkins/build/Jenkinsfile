@@ -1,0 +1,37 @@
+pipeline {
+    agent {
+        label 'michalec'
+    }
+
+    tools {
+        git 'Default'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '14', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
+        ADMIN_API_KEY      = credentials('admin-api-key')
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'cd TripPlannerBot; ./gradlew clean shadowJar --no-daemon'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh './jenkins/build/test.sh'
+            }
+        }
+    }
+
+    post {
+        success { archiveArtifacts artifacts: 'TripPlannerBot/build/libs/*.jar' }
+    }
+}

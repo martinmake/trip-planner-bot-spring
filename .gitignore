@@ -1,6 +1,7 @@
 .gradle
 **/build/
 !src/**/build/
+!jenkins/build/
 
 # Ignore Gradle GUI config
 gradle-app.setting
