@@ -17,6 +17,15 @@ parameters:
     type: string
     description: Network name or ID for the instance
 resources:
+  wait_handle:
+    type: OS::Heat::WaitConditionHandle
+
+  wait_condition:
+    type: OS::Heat::WaitCondition
+    properties:
+      handle: { get_resource: wait_handle }
+      timeout: 1800  # wait up to 15 minutes
+
   app_secgroup:
     type: OS::Neutron::SecurityGroup
     deletion_policy: Delete
@@ -56,25 +65,38 @@ resources:
       networks:
         - port: { get_resource: server_port }
       user_data_format: RAW
-      user_data: |
-        #cloud-config
-        bootcmd:
-          - |
-            curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
-              | gpg --dearmor > /usr/share/keyrings/mongodb-server-8.0.gpg
-        apt:
-          sources:
-            mongodb-org:
-              source: "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg] https://repo.mongodb.org/apt/ubuntu $RELEASE/mongodb-org/8.0 multiverse"
-        package_update: true
-        package_upgrade: true
-        packages:
-          - openjdk-21-jdk
-          - mongodb-org
-          - curl
-        runcmd:
-          - systemctl enable mongodb
-          - systemctl start mongodb
+      user_data:
+        str_replace:
+          template: |
+            #cloud-config
+            bootcmd:
+              - |
+                curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
+                  | gpg --dearmor > /usr/share/keyrings/mongodb-server-8.0.gpg
+            apt:
+              preserve_sources_list: false
+              primary:
+                - arches: [default]
+                  uri: http://mirror.yandex.ru/ubuntu/
+              security:
+                - arches: [default]
+                  uri: http://mirror.yandex.ru/ubuntu/
+              sources:
+                mongodb-org:
+                  source: "deb [arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg] https://repo.mongodb.org/apt/ubuntu $RELEASE/mongodb-org/8.0 multiverse"
+            package_update: true
+            package_upgrade: true
+            packages:
+              - openjdk-21-jdk
+              - mongodb-org
+              - curl
+            runcmd:
+              - systemctl enable mongodb
+              - systemctl start mongodb
+              - cloud-init status --wait
+              - $WAIT_HANDLE_CURL_CLI -d '{"status":"SUCCESS","reason":"cloud-init completed"}'
+          params:
+            $WAIT_HANDLE_CURL_CLI: { get_attr: [ wait_handle, curl_cli ] }
 
 outputs:
   instance_id:
