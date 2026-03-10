@@ -96,8 +96,8 @@ resources:
               - mongodb-org
               - curl
             users:
-            - name: tripplanner
-              groups: []
+              - name: tripplanner
+                groups: []
             runcmd:
               - systemctl enable mongod
               - systemctl start mongod
