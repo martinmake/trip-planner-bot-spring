@@ -69,9 +69,6 @@ resources:
         str_replace:
           template: |
             #cloud-config
-            ssh_authorized_keys:
-              - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJRy2xTx1XiYIsphsrJyZtQ3qguTFxwIfHOY+v7/j7yB michalec"
-              - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC4WVScOM5OSqrkr9f/CTKgjTQ3B9sSjdHRpFyhrWKYrjYlGnh8Mf64ClzIq+MFI6g5QcBYTsbvfv0Qd3rJmbV9x3n7fmJfx1HbAVRvCB3ELoQd0wMAaJpMSjobvBqSe/mMPysrf4TndFcp3j7nJ/c+9RpPL/QByLQUofukXbJ2QHZ3uZGYQ/6ujYsJwI6/32wCyIRahmciTO7lIgZzve3aYhZuCzCt0ObJIx4ZDfjZcv2genNfDNHkeUuDMj3RSkDQeAWzpb/Ya+gCepKpJzfsUASRcrGgeD4q+oPNG2vSaYvn0zLlbDdLCZYo67vKu9yZShh4XEZAObbyI9F6uA+Q4jVYm+n+BXkYz3C7THXe7RemJzQwg8CLj79KaTd5wQP9yeSXnQqJsncS+Y8rkG7yS8jJh78U/Gp8TfXqFZDMmWEiqm2nBkpEGc0IQvAGtVP47qxifONXYoZ7AgUgn63gCQ7UTbFlJQE9qqyk6mFHbcHW4tz0MRW2cqm84XAlCj8= jenkins@michalec"
             bootcmd:
               - |
                 curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc \
@@ -98,6 +95,10 @@ resources:
             users:
               - name: tripplanner
                 groups: []
+              - name: ubuntu
+                ssh_authorized_keys:
+                  - "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJRy2xTx1XiYIsphsrJyZtQ3qguTFxwIfHOY+v7/j7yB michalec"
+                  - "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQC4WVScOM5OSqrkr9f/CTKgjTQ3B9sSjdHRpFyhrWKYrjYlGnh8Mf64ClzIq+MFI6g5QcBYTsbvfv0Qd3rJmbV9x3n7fmJfx1HbAVRvCB3ELoQd0wMAaJpMSjobvBqSe/mMPysrf4TndFcp3j7nJ/c+9RpPL/QByLQUofukXbJ2QHZ3uZGYQ/6ujYsJwI6/32wCyIRahmciTO7lIgZzve3aYhZuCzCt0ObJIx4ZDfjZcv2genNfDNHkeUuDMj3RSkDQeAWzpb/Ya+gCepKpJzfsUASRcrGgeD4q+oPNG2vSaYvn0zLlbDdLCZYo67vKu9yZShh4XEZAObbyI9F6uA+Q4jVYm+n+BXkYz3C7THXe7RemJzQwg8CLj79KaTd5wQP9yeSXnQqJsncS+Y8rkG7yS8jJh78U/Gp8TfXqFZDMmWEiqm2nBkpEGc0IQvAGtVP47qxifONXYoZ7AgUgn63gCQ7UTbFlJQE9qqyk6mFHbcHW4tz0MRW2cqm84XAlCj8= jenkins@michalec"
             runcmd:
               - systemctl enable mongod
               - systemctl start mongod
