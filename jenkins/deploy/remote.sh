@@ -2,8 +2,8 @@
 
 set -xeu
 
-sudo install /tmp/app.jar /opt/tripplanner/
-sudo install /tmp/environment /opt/tripplanner/
-sudo install /tmp/tripplanner.service /etc/systemd/system/
+sudo install /tmp/app.jar /usr/local/lib/tripplanner/
+sudo install /tmp/env /etc/tripplanner/env
+sudo install /tmp/tripplanner.service /usr/local/lib/systemd/system/
 
 sudo systemctl restart tripplanner

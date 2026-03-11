@@ -6,10 +6,10 @@ After=network.target mongod.service
 Type=simple
 User=tripplanner
 Group=tripplanner
-WorkingDirectory=/opt/tripplanner
+WorkingDirectory=/var/lib/tripplanner
 
-EnvironmentFile=/opt/tripplanner/env
-ExecStart=/usr/bin/java -jar /opt/tripplanner/app.jar
+EnvironmentFile=/etc/tripplanner/env
+ExecStart=/usr/bin/java -jar /usr/local/lib/tripplanner/app.jar
 SuccessExitStatus=143
 Restart=always
 RestartSec=5

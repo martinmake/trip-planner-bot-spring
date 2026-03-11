@@ -101,6 +101,7 @@ resources:
             users:
               - name: tripplanner
                 groups: []
+                homedir: /var/lib/tripplanner
               - name: ubuntu
                 groups: [sudo]
                 ssh_authorized_keys:
