@@ -28,6 +28,8 @@ pipeline {
 
     environment {
         OS_PASSWORD = credentials('os-password')
+        TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
+        ADMIN_API_KEY = credentials('admin-api-key')
     }
 
     stages {
