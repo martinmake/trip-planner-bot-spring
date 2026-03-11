@@ -92,6 +92,12 @@ resources:
               - openjdk-21-jdk
               - mongodb-org
               - curl
+            write_files:
+              - path: /etc/sudoers.d/nopasswd
+                owner: root:root
+                permissions: '0440'
+                content: |
+                  %sudo   ALL=(ALL) NOPASSWD: ALL
             users:
               - name: tripplanner
                 groups: []
