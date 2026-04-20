@@ -28,7 +28,7 @@ services:
       SPRING_DATA_MONGODB_DATABASE: tripplanner
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
     ports:
-      - "8080:8080"
+      - "8088:8080"
     networks:
       - app-network
     container_name: app
