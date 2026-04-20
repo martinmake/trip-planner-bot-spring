@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'michalec'
-    }
+    agent any
 
     tools {
         git 'Default'
