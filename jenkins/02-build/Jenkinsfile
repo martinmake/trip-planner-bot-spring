@@ -20,13 +20,13 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'cd TripPlannerBot; ./gradlew clean shadowJar --no-daemon'
+                sh './jenkins/02-build/build.sh'
             }
         }
 
         stage('Test') {
             steps {
-                sh './jenkins/build/test.sh'
+                sh './jenkins/02-build/test.sh'
             }
         }
     }

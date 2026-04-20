@@ -25,4 +25,4 @@ scp -o StrictHostKeyChecking=no env ${SSH_USER}@${VM_HOST}:/tmp/env
 rm env
 scp -o StrictHostKeyChecking=no ${JAR} ${SSH_USER}@${VM_HOST}:/tmp/app.jar
 scp -o StrictHostKeyChecking=no "jenkins/deploy/tripplanner.service" ${SSH_USER}@${VM_HOST}:/tmp/
-ssh -o StrictHostKeyChecking=no ${SSH_USER}@${VM_HOST} 'sh -s /dev/stdin' < "jenkins/deploy/remote.sh"
+ssh -o StrictHostKeyChecking=no ${SSH_USER}@${VM_HOST} 'sh -s /dev/stdin' < "jenkins/04-deploy/remote.sh"

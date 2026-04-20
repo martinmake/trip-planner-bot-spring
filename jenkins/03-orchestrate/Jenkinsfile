@@ -34,13 +34,8 @@ pipeline {
     stages {
         stage('Deploy Heat Stack') {
             steps {
-                sh './jenkins/orchestrate/deploy.sh'
+                sh './jenkins/03-orchestrate/orchestrate.sh'
             }
-        }
-    }
-    post {
-        always {
-            archiveArtifacts artifacts: 'heat/*.yaml', allowEmptyArchive: true
         }
     }
 }

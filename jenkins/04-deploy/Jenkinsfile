@@ -45,7 +45,7 @@ pipeline {
 
         stage('Deploy Systemd Service') {
             steps {
-                sh './jenkins/deploy/deploy.sh'
+                sh './jenkins/04-deploy/deploy.sh'
             }
         }
     }
