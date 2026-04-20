@@ -2,8 +2,6 @@ services:
   mongo:
     image: docker.io/library/mongo:7
     container_name: mongo
-    ports:
-      - "27018:27017"
     volumes:
       - mongo-data:/data/db
     networks:
@@ -24,7 +22,7 @@ services:
         condition: service_healthy
     environment:
       ADMIN_API_KEY: ${ADMIN_API_KEY}
-      SPRING_DATA_MONGODB_URI: mongodb://host.docker.internal:27017/tripplanner?retryWrites=true&w=majority&connectTimeoutMS=30000&socketTimeoutMS=30000&serverSelectionTimeoutMS=30000&maxPoolSize=50&minPoolSize=10&maxIdleTimeMS=60000&waitQueueTimeoutMS=30000
+      SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/tripplanner?retryWrites=true&w=majority&connectTimeoutMS=30000&socketTimeoutMS=30000&serverSelectionTimeoutMS=30000&maxPoolSize=50&minPoolSize=10&maxIdleTimeMS=60000&waitQueueTimeoutMS=30000
       SPRING_DATA_MONGODB_DATABASE: tripplanner
       TELEGRAM_BOT_TOKEN: ${TELEGRAM_BOT_TOKEN}
     ports:
