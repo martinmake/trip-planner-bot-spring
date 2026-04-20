@@ -18,8 +18,7 @@ services:
       dockerfile: Dockerfile
     restart: on-failure:3
     depends_on:
-      mongo:
-        condition: service_healthy
+      - mongo
     environment:
       ADMIN_API_KEY: ${ADMIN_API_KEY}
       SPRING_DATA_MONGODB_URI: mongodb://mongo:27017/tripplanner?retryWrites=true&w=majority&connectTimeoutMS=30000&socketTimeoutMS=30000&serverSelectionTimeoutMS=30000&maxPoolSize=50&minPoolSize=10&maxIdleTimeMS=60000&waitQueueTimeoutMS=30000
