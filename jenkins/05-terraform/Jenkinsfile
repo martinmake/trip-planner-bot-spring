@@ -1,0 +1,48 @@
+pipeline {
+    agent any
+
+    tools {
+        git 'Default'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '14', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    parameters {
+        string(name: 'YC_FOLDER_ID',      defaultValue: 'b1gj8t6a23qthe0mdeck', description: 'ID каталога Yandex Cloud')
+        string(name: 'SSH_CREDENTIAL_ID', defaultValue: 'ya-cloud-ssh',         description: 'Jenkins SSH credential')
+        string(name: 'SSH_PUBKEY_ID',     defaultValue: 'ya-cloud-ssh-pub',     description: 'Jenkins Secret text с публичным SSH-ключом')
+        string(name: 'YC_TOKEN_ID',       defaultValue: 'yandex-oauth',         description: 'Jenkins Secret text с OAuth-токеном YC')
+        string(name: 'TG_TOKEN_ID',       defaultValue: 'telegram-bot-token',   description: 'Jenkins Secret text с токеном Telegram бота')
+    }
+
+    stages {
+        stage('Terraform') {
+            steps {
+                withCredentials([
+                    string(credentialsId: params.YC_TOKEN_ID,  variable: 'YC_TOKEN'),
+                    string(credentialsId: params.SSH_PUBKEY_ID, variable: 'SSH_PUB_KEY')
+                ]) {
+                    dir('jenkins/05-terraform') {
+                        sh './terraform.sh'
+                    }
+                }
+            }
+        }
+
+        stage('Ansible') {
+            steps {
+                withCredentials([
+                    sshUserPrivateKey(credentialsId: params.SSH_CREDENTIAL_ID, keyFileVariable: 'SSH_KEY'),
+                    string(credentialsId: params.TG_TOKEN_ID, variable: 'TG_TOKEN')
+                ]) {
+                    dir('jenkins/05-terraform') {
+                        sh "./ansible.sh"
+                    }
+                }
+            }
+        }
+    }
+}
