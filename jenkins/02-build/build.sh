@@ -2,4 +2,5 @@
 
 set -xe
 
-./TripPlannerBot/gradlew clean shadowJar --no-daemon
+cd TripPlannerBot
+./gradlew clean shadowJar --no-daemon
