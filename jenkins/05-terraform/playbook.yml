@@ -82,6 +82,11 @@
         group: "{{ app_group }}"
         mode: "0755"
 
+    - name: Create etc directory
+      file:
+        path: "/etc/tripplanner"
+        state: directory
+
     - name: Create env file for application
       copy:
         dest: "/etc/tripplanner/env"
