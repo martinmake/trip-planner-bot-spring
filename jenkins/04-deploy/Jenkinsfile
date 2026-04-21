@@ -13,6 +13,7 @@ pipeline {
     parameters {
         string(name: 'VM_HOST', description: 'IP/hostname of VM')
         string(name: 'SSH_USER',  defaultValue: 'ubuntu', description: 'SSH user on VM (ubuntu for Ubuntu cloud images)')
+        string(name: 'SSH_CREDENTIAL_ID', defaultValue: 'ya-cloud-ssh', description: 'Jenkins SSH credential')
         string(name: 'BUILD_JOB', defaultValue: '02-build',  description: 'Upstream build job that produces JAR (not deploy job!)')
     }
 
@@ -34,7 +35,11 @@ pipeline {
 
         stage('Deploy Systemd Service') {
             steps {
-                sh './jenkins/04-deploy/deploy.sh'
+               withCredentials([
+                    sshUserPrivateKey(credentialsId: params.SSH_CREDENTIAL_ID, keyFileVariable: 'SSH_KEY'),
+                ]) {
+                    sh './jenkins/04-deploy/deploy.sh'
+                }
             }
         }
     }
