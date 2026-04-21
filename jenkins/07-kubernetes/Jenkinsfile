@@ -1,0 +1,119 @@
+pipeline {
+    agent any
+
+    tools {
+        git 'Default'
+    }
+
+    options {
+        buildDiscarder(logRotator(daysToKeepStr: '14', numToKeepStr: '10'))
+        disableConcurrentBuilds()
+    }
+
+    environment {
+        TELEGRAM_TOKEN = credentials('telegram-bot-token')
+        MONGO_URI = credentials('mongo-uri-k8s')
+        DOCKER_IMAGE = 'docker.io/martinmake/tripplanner'
+        IMAGE_TAG = "${env.BUILD_NUMBER ?: 'latest'}"
+        K8S_NAMESPACE = 'tripplanner'
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                checkout scm
+                sh './jenkins/02-build/build.sh'
+                dir('TripPlannerBot') {
+                    sh '''
+                        export DOCKER_BUILDKIT=1
+                        podman buildx build --platform linux/amd64 --load \
+                          -t ${DOCKER_IMAGE}:${IMAGE_TAG} \
+                          -t ${DOCKER_IMAGE}:latest \
+                          .
+                    '''
+                }
+            }
+        }
+
+        stage('Push') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'docker-hub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | podman login -u "$DOCKER_USER" --password-stdin docker.io
+                        podman push ${DOCKER_IMAGE}:${IMAGE_TAG}
+                        podman push ${DOCKER_IMAGE}:latest
+                    '''
+                }
+            }
+        }
+
+        stage('Start k3s on VM') {
+            steps {
+                withCredentials([
+                    string(credentialsId: 'k8s-node-host', variable: 'K8S_NODE_HOST'),
+                    sshUserPrivateKey(credentialsId: 'ya-cloud-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+                ]) {
+                    sh '''#!/usr/bin/env bash
+set -euo pipefail
+chmod 600 "$SSH_KEY" || true
+SSH_OPTS=(
+  -i "$SSH_KEY"
+  -o StrictHostKeyChecking=no
+  -o UserKnownHostsFile=/dev/null
+  -o ServerAliveInterval=30
+)
+ssh "${SSH_OPTS[@]}" "${SSH_USER}@${K8S_NODE_HOST}" \
+  'sudo systemctl start k3s; for i in $(seq 1 60); do sudo k3s kubectl get nodes --request-timeout=5s >/dev/null 2>&1 && exit 0; sleep 2; done; exit 1'
+'''
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh 'kubectl apply -f jenkins/07-kubernetes/namespace.yaml'
+                    sh "kubectl apply -f jenkins/07-kubernetes/mongo.yaml -n ${env.K8S_NAMESPACE}"
+                    sh """
+                        kubectl create secret generic tripplanner-secrets \\
+                            --namespace=${env.K8S_NAMESPACE} \\
+                            --from-literal=TELEGRAM_BOT_TOKEN=\${TELEGRAM_TOKEN} \\
+                            --from-literal=SPRING_DATA_MONGODB_URI=\${MONGO_URI} \\
+                            --from-literal=SPRING_DATA_MONGODB_DATABASE=tripplanner \\
+                            --dry-run=client -o yaml | kubectl apply -f -
+                    """
+                    sh "kubectl apply -f jenkins/07-kubernetes/tripplanner-service.yaml -n ${env.K8S_NAMESPACE}"
+                    sh """
+                        sed -e 's|__APP_IMAGE__|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|g' \\
+                            -e 's|__IMAGE_PULL_POLICY__|Always|g' \\
+                            jenkins/07-kubernetes/tripplanner-deployment.yaml > jenkins/07-kubernetes/tripplanner-deployment.rendered.yaml
+                        kubectl apply -f jenkins/07-kubernetes/tripplanner-deployment.rendered.yaml -n ${env.K8S_NAMESPACE}
+                    """
+                }
+            }
+        }
+
+        stage('Verify') {
+            steps {
+                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+                    sh """
+                        kubectl rollout status deployment/mongo -n ${env.K8S_NAMESPACE} --timeout=600s
+                        kubectl rollout status deployment/tripplanner -n ${env.K8S_NAMESPACE} --timeout=300s
+                        kubectl get pods -n ${env.K8S_NAMESPACE} -o wide
+                        kubectl get svc -n ${env.K8S_NAMESPACE}
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        always {
+            archiveArtifacts artifacts: 'TripPlannerBot/build/libs/*.jar', fingerprint: true, allowEmptyArchive: true
+        }
+    }
+}
