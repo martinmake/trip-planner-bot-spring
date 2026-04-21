@@ -5,7 +5,7 @@
   vars:
     app_user: tripplanner
     app_group: tripplanner
-    app_dir: /opt/tripplanner
+    app_home: /var/lib/tripplanner/tripplanner
     mongodb_uri: "{{ spring_data_mongodb_uri | default('mongodb://localhost:27017/tripplanner?retryWrites=true&w=majority') }}"
     mongodb_database: "{{ spring_data_mongodb_database | default('tripplanner') }}"
 
@@ -69,14 +69,14 @@
       user:
         name: "{{ app_user }}"
         group: "{{ app_group }}"
-        home: "{{ app_dir }}"
+        home: "{{ app_home }}"
         shell: /bin/bash
         create_home: false
         system: true
 
     - name: Create application directory
       file:
-        path: "{{ app_dir }}"
+        path: "{{ app_home }}"
         state: directory
         owner: "{{ app_user }}"
         group: "{{ app_group }}"
@@ -84,7 +84,7 @@
 
     - name: Create env file for application
       copy:
-        dest: "{{ app_dir }}/env"
+        dest: "/etc/tripplanner/env"
         content: |
           SPRING_DATA_MONGODB_URI={{ mongodb_uri }}
           SPRING_DATA_MONGODB_DATABASE={{ mongodb_database }}
@@ -95,7 +95,7 @@
 
     - name: Deploy systemd tripplanner service
       copy:
-        dest: /etc/systemd/system/tripplanner.service
+        dest: /usr/local/lib/systemd/system/tripplanner.service
         content: |
           [Unit]
           Description=TripPlanner Telegram Bot
@@ -106,11 +106,11 @@
           Type=simple
           User={{ app_user }}
           Group={{ app_group }}
-          WorkingDirectory={{ app_dir }}
+          WorkingDirectory={{ app_home }}
 
-          EnvironmentFile=-{{ app_dir }}/env
+          EnvironmentFile=/etc/tripplanner//env
 
-          ExecStart=/usr/bin/java -Xmx512m -Dfile.encoding=UTF-8 -jar {{ app_dir }}/app.jar
+          ExecStart=/usr/bin/java -Xmx512m -Dfile.encoding=UTF-8 -jar /usr/local/lib/tripplanner/app.jar
           SuccessExitStatus=143
           Restart=always
           RestartSec=5
