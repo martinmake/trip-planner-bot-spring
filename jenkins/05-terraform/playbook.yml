@@ -100,7 +100,7 @@
 
     - name: Deploy systemd tripplanner service
       copy:
-        dest: /usr/local/lib/systemd/system/tripplanner.service
+        dest: /etc/systemd/system/tripplanner.service
         content: |
           [Unit]
           Description=TripPlanner Telegram Bot
