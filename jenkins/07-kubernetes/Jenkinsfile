@@ -76,8 +76,8 @@ ssh "${SSH_OPTS[@]}" "${SSH_USER}@${K8S_NODE_HOST}" \
         stage('Deploy') {
             steps {
                 withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh 'kubectl apply -f jenkins/07-kubernetes/namespace.yaml'
-                    sh "kubectl apply -f jenkins/07-kubernetes/mongo.yaml -n ${env.K8S_NAMESPACE}"
+                    sh 'kubectl apply -f jenkins/07-kubernetes/namespace.yml'
+                    sh "kubectl apply -f jenkins/07-kubernetes/mongo.yml -n ${env.K8S_NAMESPACE}"
                     sh """
                         kubectl create secret generic tripplanner-secrets \\
                             --namespace=${env.K8S_NAMESPACE} \\
@@ -86,12 +86,12 @@ ssh "${SSH_OPTS[@]}" "${SSH_USER}@${K8S_NODE_HOST}" \
                             --from-literal=SPRING_DATA_MONGODB_DATABASE=tripplanner \\
                             --dry-run=client -o yaml | kubectl apply -f -
                     """
-                    sh "kubectl apply -f jenkins/07-kubernetes/tripplanner-service.yaml -n ${env.K8S_NAMESPACE}"
+                    sh "kubectl apply -f jenkins/07-kubernetes/service.yml -n ${env.K8S_NAMESPACE}"
                     sh """
                         sed -e 's|__APP_IMAGE__|${env.DOCKER_IMAGE}:${env.IMAGE_TAG}|g' \\
                             -e 's|__IMAGE_PULL_POLICY__|Always|g' \\
-                            jenkins/07-kubernetes/tripplanner-deployment.yaml > jenkins/07-kubernetes/tripplanner-deployment.rendered.yaml
-                        kubectl apply -f jenkins/07-kubernetes/tripplanner-deployment.rendered.yaml -n ${env.K8S_NAMESPACE}
+                            jenkins/07-kubernetes/deployment.yml > jenkins/07-kubernetes/deployment.rendered.yml
+                        kubectl apply -f jenkins/07-kubernetes/deployment.rendered.yml -n ${env.K8S_NAMESPACE}
                     """
                 }
             }
