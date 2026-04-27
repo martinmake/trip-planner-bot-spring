@@ -2,6 +2,8 @@
 
 set -xeu
 
+. /var/lib/jenkins/.venv/bin/activate
+
 command="create"
 if openstack stack show "${STACK_NAME}" >/dev/null 2>&1; then
     command="update"
