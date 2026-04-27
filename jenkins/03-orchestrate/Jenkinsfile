@@ -15,14 +15,14 @@ pipeline {
         string(name: 'IMAGE',      defaultValue: 'ununtu-22.04',         description: 'Glance image')
         string(name: 'FLAVOR',     defaultValue: 'm1.small',             description: 'Nova flavor')
         string(name: 'KEY_NAME',   defaultValue: 'Martin Michalec',      description: 'SSH key pair name')
-        string(name: 'NETWORK',    defaultValue: 'sutdents-net',         description: 'Network name or ID')
+        string(name: 'NETWORK',    defaultValue: 'student-net',          description: 'Network name or ID')
 
-        string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000/v3', description: 'OpenStack authentication URL')
-        string (name: 'OS_PROJECT_NAME',         defaultValue: 'students',                        description: 'OpenStack project name')
-        string (name: 'OS_USERNAME',             defaultValue: 'ccstudent2026',                   description: 'OpenStack username')
-        string (name: 'OS_USER_DOMAIN_NAME',     defaultValue: 'default',                         description: 'OpenStack user domain name')
-        string (name: 'OS_PROJECT_DOMAIN_NAME',  defaultValue: 'default',                         description: 'OpenStack project domain name')
-        string (name: 'OS_IDENTITY_API_VERSION', defaultValue: '3',                               description: 'OpenStack identity API version')
+        string (name: 'OS_AUTH_URL',             defaultValue: 'https://cloud.crplab.ru:5000', description: 'OpenStack authentication URL')
+        string (name: 'OS_PROJECT_NAME',         defaultValue: 'student',                      description: 'OpenStack project name')
+        string (name: 'OS_USERNAME',             defaultValue: 'student',                      description: 'OpenStack username')
+        string (name: 'OS_USER_DOMAIN_NAME',     defaultValue: 'Default',                      description: 'OpenStack user domain name')
+        string (name: 'OS_PROJECT_DOMAIN_NAME',  defaultValue: 'default',                      description: 'OpenStack project domain name')
+        string (name: 'OS_IDENTITY_API_VERSION', defaultValue: '3',                            description: 'OpenStack identity API version')
     }
 
     environment {
