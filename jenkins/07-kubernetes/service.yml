@@ -7,5 +7,5 @@ spec:
   selector:
     app: tripplanner
   ports:
-    - port: 8080
+    - port: 8088
       targetPort: 8080
